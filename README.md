@@ -22,9 +22,16 @@ Full Discord API access through the [Model Context Protocol (MCP)](https://model
 1. Create an application in the [Discord Developer Portal](https://discord.com/developers/applications).
 2. **Bot** → reset token and copy it.
 3. Enable intents as needed:
-    - **Message Content Intent** — reading message bodies
-    - **Server Members Intent** — `discord_list_members`
-4. Invite the bot with permissions matching the tools you use (e.g. `MANAGE_MESSAGES`, `BAN_MEMBERS`, `MANAGE_CHANNELS`).
+   - **Message Content Intent** — reading message bodies
+   - **Server Members Intent** — `discord_list_members`
+4. Copy your **Application ID** from **OAuth2** → **General** (Developer Portal).
+5. Invite the bot to your server — replace `YOUR_CLIENT_ID` in the URL below:
+
+```
+https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=1495454280919&scope=bot
+```
+
+This sets the `bot` scope and permissions used by the MCP tools (channels, messages, threads, reactions, webhooks, roles, moderation, audit log, invites). Remove permissions you do not need via the [permission calculator](https://discordapi.com/permissions.html) if you prefer a narrower invite.
 
 ## Quick start
 
