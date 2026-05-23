@@ -1,0 +1,4 @@
+# Copy to .dev.vars for local development (never commit .dev.vars)
+DISCORD_BOT_TOKEN=your-discord-bot-token
+# Optional alias:
+# DISCORD_TOKEN=your-discord-bot-token
