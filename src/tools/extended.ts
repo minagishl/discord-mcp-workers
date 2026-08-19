@@ -338,6 +338,44 @@ export function registerExtendedDiscordTools(server: McpServer, env: ToolEnv) {
 			}),
 	);
 
+	server.registerTool(
+		"discord_set_channel_member_permissions",
+		{
+			description: "Set channel permission overwrite for a member",
+			inputSchema: {
+				channelId: z.string(),
+				userId: z.string().describe("User ID to apply overwrite to"),
+				allow: z.string().default("0").describe("Allow permissions bitfield as string"),
+				deny: z.string().default("0").describe("Deny permissions bitfield as string"),
+			},
+		},
+		async ({ channelId, userId, allow, deny }) =>
+			runToolWithArgs(env, { channelId, userId, allow, deny }, async (client, args) => {
+				await client.setChannelPermissionOverwrite(args.channelId, args.userId, {
+					type: 1,
+					allow: args.allow,
+					deny: args.deny,
+				});
+				return `Updated member overwrite for user ${args.userId} on channel ${args.channelId}`;
+			}),
+	);
+
+	server.registerTool(
+		"discord_delete_channel_permissions",
+		{
+			description: "Delete a channel permission overwrite for role or member",
+			inputSchema: {
+				channelId: z.string(),
+				overwriteId: z.string().describe("Role ID or user ID overwrite target"),
+			},
+		},
+		async ({ channelId, overwriteId }) =>
+			runToolWithArgs(env, { channelId, overwriteId }, async (client, args) => {
+				await client.deleteChannelPermissionOverwrite(args.channelId, args.overwriteId);
+				return `Deleted overwrite ${args.overwriteId} on channel ${args.channelId}`;
+			}),
+	);
+
 	// --- Guild members / roles ---
 	server.registerTool(
 		"discord_list_roles",
@@ -391,6 +429,64 @@ export function registerExtendedDiscordTools(server: McpServer, env: ToolEnv) {
 					};
 				},
 			),
+	);
+
+	server.registerTool(
+		"discord_edit_role",
+		{
+			description: "Edit an existing role in a server",
+			inputSchema: {
+				guildId: z.string(),
+				roleId: z.string(),
+				name: z.string().optional(),
+				permissions: z
+					.string()
+					.optional()
+					.describe("Permissions bitfield as string (e.g. 2048)"),
+				color: z.number().int().min(0).max(16777215).optional(),
+				hoist: z.boolean().optional(),
+				mentionable: z.boolean().optional(),
+			},
+		},
+		async ({ guildId, roleId, name, permissions, color, hoist, mentionable }) =>
+			runToolWithArgs(
+				env,
+				{ guildId, roleId, name, permissions, color, hoist, mentionable },
+				async (client, args) => {
+					const role = await client.editRole(args.guildId, args.roleId, {
+						name: args.name,
+						permissions: args.permissions,
+						color: args.color,
+						hoist: args.hoist,
+						mentionable: args.mentionable,
+					});
+					return {
+						id: role.id,
+						name: role.name,
+						permissions: role.permissions,
+						color: role.color,
+						position: role.position,
+						hoist: role.hoist,
+						mentionable: role.mentionable,
+					};
+				},
+			),
+	);
+
+	server.registerTool(
+		"discord_delete_role",
+		{
+			description: "Delete a role in a server",
+			inputSchema: {
+				guildId: z.string(),
+				roleId: z.string(),
+			},
+		},
+		async ({ guildId, roleId }) =>
+			runToolWithArgs(env, { guildId, roleId }, async (client, args) => {
+				await client.deleteRole(args.guildId, args.roleId);
+				return `Deleted role ${args.roleId}`;
+			}),
 	);
 
 	server.registerTool(

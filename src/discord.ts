@@ -60,6 +60,8 @@ export type CreateRoleOptions = {
 	mentionable?: boolean;
 };
 
+export type EditRoleOptions = CreateRoleOptions;
+
 export type ChannelPermissionOverwrite = {
 	type: 0 | 1;
 	allow: string;
@@ -133,6 +135,14 @@ export class DiscordClient {
 
 	createRole(guildId: string, options: CreateRoleOptions) {
 		return this.request<DiscordRecord>("POST", `/guilds/${guildId}/roles`, options);
+	}
+
+	editRole(guildId: string, roleId: string, options: EditRoleOptions) {
+		return this.request<DiscordRecord>("PATCH", `/guilds/${guildId}/roles/${roleId}`, options);
+	}
+
+	deleteRole(guildId: string, roleId: string) {
+		return this.request<void>("DELETE", `/guilds/${guildId}/roles/${roleId}`);
 	}
 
 	listEmojis(guildId: string) {
@@ -282,6 +292,10 @@ export class DiscordClient {
 			`/channels/${channelId}/permissions/${overwriteId}`,
 			overwrite,
 		);
+	}
+
+	deleteChannelPermissionOverwrite(channelId: string, overwriteId: string) {
+		return this.request<void>("DELETE", `/channels/${channelId}/permissions/${overwriteId}`);
 	}
 
 	// --- Messages ---
