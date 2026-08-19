@@ -316,6 +316,28 @@ export function registerExtendedDiscordTools(server: McpServer, env: ToolEnv) {
 			),
 	);
 
+	server.registerTool(
+		"discord_set_channel_role_permissions",
+		{
+			description: "Set channel permission overwrite for a role",
+			inputSchema: {
+				channelId: z.string(),
+				roleId: z.string().describe("Role ID to apply overwrite to"),
+				allow: z.string().default("0").describe("Allow permissions bitfield as string"),
+				deny: z.string().default("0").describe("Deny permissions bitfield as string"),
+			},
+		},
+		async ({ channelId, roleId, allow, deny }) =>
+			runToolWithArgs(env, { channelId, roleId, allow, deny }, async (client, args) => {
+				await client.setChannelPermissionOverwrite(args.channelId, args.roleId, {
+					type: 0,
+					allow: args.allow,
+					deny: args.deny,
+				});
+				return `Updated role overwrite for role ${args.roleId} on channel ${args.channelId}`;
+			}),
+	);
+
 	// --- Guild members / roles ---
 	server.registerTool(
 		"discord_list_roles",
@@ -328,6 +350,47 @@ export function registerExtendedDiscordTools(server: McpServer, env: ToolEnv) {
 				const roles = await client.listRoles(id);
 				return client.formatRoles(roles);
 			}),
+	);
+
+	server.registerTool(
+		"discord_create_role",
+		{
+			description: "Create a role in a server",
+			inputSchema: {
+				guildId: z.string(),
+				name: z.string().describe("Role name"),
+				permissions: z
+					.string()
+					.optional()
+					.describe("Permissions bitfield as string (e.g. 2048)"),
+				color: z.number().int().min(0).max(16777215).optional(),
+				hoist: z.boolean().optional().describe("Show separately in member list"),
+				mentionable: z.boolean().optional(),
+			},
+		},
+		async ({ guildId, name, permissions, color, hoist, mentionable }) =>
+			runToolWithArgs(
+				env,
+				{ guildId, name, permissions, color, hoist, mentionable },
+				async (client, args) => {
+					const role = await client.createRole(args.guildId, {
+						name: args.name,
+						permissions: args.permissions,
+						color: args.color,
+						hoist: args.hoist,
+						mentionable: args.mentionable,
+					});
+					return {
+						id: role.id,
+						name: role.name,
+						permissions: role.permissions,
+						color: role.color,
+						position: role.position,
+						hoist: role.hoist,
+						mentionable: role.mentionable,
+					};
+				},
+			),
 	);
 
 	server.registerTool(

@@ -52,6 +52,20 @@ export type CreateInviteOptions = {
 	unique?: boolean;
 };
 
+export type CreateRoleOptions = {
+	name?: string;
+	permissions?: string;
+	color?: number;
+	hoist?: boolean;
+	mentionable?: boolean;
+};
+
+export type ChannelPermissionOverwrite = {
+	type: 0 | 1;
+	allow: string;
+	deny: string;
+};
+
 export class DiscordClient {
 	constructor(private readonly botToken: string) {}
 
@@ -115,6 +129,10 @@ export class DiscordClient {
 
 	listRoles(guildId: string) {
 		return this.request<DiscordRecord[]>("GET", `/guilds/${guildId}/roles`);
+	}
+
+	createRole(guildId: string, options: CreateRoleOptions) {
+		return this.request<DiscordRecord>("POST", `/guilds/${guildId}/roles`, options);
 	}
 
 	listEmojis(guildId: string) {
@@ -252,6 +270,18 @@ export class DiscordClient {
 
 	createInvite(channelId: string, options?: CreateInviteOptions) {
 		return this.request<DiscordRecord>("POST", `/channels/${channelId}/invites`, options ?? {});
+	}
+
+	setChannelPermissionOverwrite(
+		channelId: string,
+		overwriteId: string,
+		overwrite: ChannelPermissionOverwrite,
+	) {
+		return this.request<void>(
+			"PUT",
+			`/channels/${channelId}/permissions/${overwriteId}`,
+			overwrite,
+		);
 	}
 
 	// --- Messages ---

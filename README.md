@@ -4,7 +4,7 @@ Full Discord API access through the [Model Context Protocol (MCP)](https://model
 
 ## Features
 
-- **55 MCP tools** — servers, messages, channels, reactions, forums, threads, webhooks, moderation, and more
+- **57 MCP tools** — servers, messages, channels, reactions, forums, threads, webhooks, moderation, and more
 - **Server & members** — roles, emojis, member list, moderation (kick/ban/timeout), audit log
 - **Messages** — read (paginated), send, edit, embeds, polls, pins, search
 - **Channels** — text/voice/announcement, edit, invites, webhooks
@@ -22,8 +22,8 @@ Full Discord API access through the [Model Context Protocol (MCP)](https://model
 1. Create an application in the [Discord Developer Portal](https://discord.com/developers/applications).
 2. **Bot** → reset token and copy it.
 3. Enable intents as needed:
-   - **Message Content Intent** — reading message bodies
-   - **Server Members Intent** — `discord_list_members`
+    - **Message Content Intent** — reading message bodies
+    - **Server Members Intent** — `discord_list_members`
 4. Copy your **Application ID** from **OAuth2** → **General** (Developer Portal).
 5. Invite the bot to your server — replace `YOUR_CLIENT_ID` in the URL below:
 
@@ -60,7 +60,7 @@ pnpm exec wrangler secret put DISCORD_BOT_TOKEN
 pnpm deploy
 ```
 
-## MCP tools (55)
+## MCP tools (57)
 
 ### Essential
 
@@ -79,16 +79,16 @@ pnpm deploy
 
 ### Additional
 
-| Category   | Tools                                                                                                                                                                  |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bot        | `discord_get_me`                                                                                                                                                       |
-| Messages   | `discord_get_message`, `discord_edit_message`, `discord_send_embed`, `discord_create_poll`, `discord_pin_message`, `discord_unpin_message`, `discord_list_pins`        |
-| Channels   | `discord_get_channel`, `discord_edit_channel`, `discord_list_webhooks`, `discord_create_voice_channel`, `discord_create_announcement_channel`, `discord_create_invite` |
-| Guild      | `discord_list_roles`, `discord_list_emojis`, `discord_get_member`, `discord_list_members`, `discord_add_role`, `discord_remove_role`                                   |
-| Moderation | `discord_kick_member`, `discord_ban_member`, `discord_unban_member`, `discord_timeout_member`, `discord_get_audit_log`                                                 |
-| Reactions  | `discord_get_reaction_users`, `discord_clear_reactions`                                                                                                                |
-| Threads    | `discord_archive_thread`, `discord_unarchive_thread`, `discord_lock_thread`, `discord_join_thread`, `discord_leave_thread`                                             |
-| Webhooks   | `discord_send_webhook_embed`                                                                                                                                           |
+| Category   | Tools                                                                                                                                                                                                          |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bot        | `discord_get_me`                                                                                                                                                                                               |
+| Messages   | `discord_get_message`, `discord_edit_message`, `discord_send_embed`, `discord_create_poll`, `discord_pin_message`, `discord_unpin_message`, `discord_list_pins`                                                |
+| Channels   | `discord_get_channel`, `discord_edit_channel`, `discord_list_webhooks`, `discord_create_voice_channel`, `discord_create_announcement_channel`, `discord_create_invite`, `discord_set_channel_role_permissions` |
+| Guild      | `discord_list_roles`, `discord_create_role`, `discord_list_emojis`, `discord_get_member`, `discord_list_members`, `discord_add_role`, `discord_remove_role`                                                    |
+| Moderation | `discord_kick_member`, `discord_ban_member`, `discord_unban_member`, `discord_timeout_member`, `discord_get_audit_log`                                                                                         |
+| Reactions  | `discord_get_reaction_users`, `discord_clear_reactions`                                                                                                                                                        |
+| Threads    | `discord_archive_thread`, `discord_unarchive_thread`, `discord_lock_thread`, `discord_join_thread`, `discord_leave_thread`                                                                                     |
+| Webhooks   | `discord_send_webhook_embed`                                                                                                                                                                                   |
 
 Not implemented (REST/multipart or Gateway-heavy): file attachments, message components/buttons, slash command registration, real-time Gateway events.
 
