@@ -199,7 +199,8 @@ export function registerExtendedDiscordTools(server: McpServer, env: ToolEnv) {
 	server.registerTool(
 		"discord_edit_channel",
 		{
-			description: "Update channel settings (name, topic, slowmode, nsfw, category)",
+			description:
+				"Update channel settings (name, topic, slowmode, nsfw, category, position)",
 			inputSchema: {
 				channelId: z.string(),
 				name: z.string().optional(),
@@ -217,12 +218,18 @@ export function registerExtendedDiscordTools(server: McpServer, env: ToolEnv) {
 					.nullable()
 					.optional()
 					.describe("Category ID or null to remove"),
+				position: z
+					.number()
+					.int()
+					.min(0)
+					.optional()
+					.describe("Channel position in sidebar order"),
 			},
 		},
-		async ({ channelId, name, topic, nsfw, rateLimitPerUser, parentId }) =>
+		async ({ channelId, name, topic, nsfw, rateLimitPerUser, parentId, position }) =>
 			runToolWithArgs(
 				env,
-				{ channelId, name, topic, nsfw, rateLimitPerUser, parentId },
+				{ channelId, name, topic, nsfw, rateLimitPerUser, parentId, position },
 				async (client, args) =>
 					client.editChannel(args.channelId, {
 						name: args.name,
@@ -230,6 +237,7 @@ export function registerExtendedDiscordTools(server: McpServer, env: ToolEnv) {
 						nsfw: args.nsfw,
 						rate_limit_per_user: args.rateLimitPerUser,
 						parent_id: args.parentId,
+						position: args.position,
 					}),
 			),
 	);
