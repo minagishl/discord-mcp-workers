@@ -4,11 +4,11 @@ Full Discord API access through the [Model Context Protocol (MCP)](https://model
 
 ## Features
 
-- **61 MCP tools** — servers, messages, channels, reactions, forums, threads, webhooks, moderation, and more
-- **Server & members** — roles, emojis, member list, moderation (kick/ban/timeout), audit log
-- **Messages** — read (paginated), send, edit, embeds, polls, pins, search
-- **Channels** — text/voice/announcement, edit, invites, webhooks
-- **Reactions, forums, threads, webhooks** — full thread lifecycle and webhook embeds
+- **200 MCP tools** covering Discord REST API v10 resources used by bots
+- **Servers & members** — roles, emojis, stickers, soundboard, members, bans, prune, audit log
+- **Messages** — read/send/edit/delete, embeds, polls, pins, search, bulk delete, attachments, components, stickers
+- **Channels** — text/voice/announcement/forum/stage/media, permissions, invites, positions
+- **Threads, webhooks, events, automod, stage, voice, templates, slash commands**
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ Full Discord API access through the [Model Context Protocol (MCP)](https://model
 2. **Bot** → reset token and copy it.
 3. Enable intents as needed:
     - **Message Content Intent** — reading message bodies
-    - **Server Members Intent** — `discord_list_members`
+    - **Server Members Intent** — `discord_list_members` / member search
 4. Copy your **Application ID** from **OAuth2** → **General** (Developer Portal).
 5. Invite the bot to your server — replace `YOUR_CLIENT_ID` in the URL below:
 
@@ -31,7 +31,7 @@ Full Discord API access through the [Model Context Protocol (MCP)](https://model
 https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=1495454280919&scope=bot
 ```
 
-This sets the `bot` scope and permissions used by the MCP tools (channels, messages, threads, reactions, webhooks, roles, moderation, audit log, invites). Remove permissions you do not need via the [permission calculator](https://discordapi.com/permissions.html) if you prefer a narrower invite.
+This sets the `bot` scope and a broad permission set used by the MCP tools. Narrow it with the [permission calculator](https://discordapi.com/permissions.html) if preferred. Some tools (slash command _execution_, component clicks) still need Gateway/HTTP Interactions hosting — registration and follow-up REST tools are included.
 
 ## Quick start
 
@@ -60,37 +60,30 @@ pnpm exec wrangler secret put DISCORD_BOT_TOKEN
 pnpm deploy
 ```
 
-## MCP tools (61)
+## MCP tools (200)
 
-### Essential
+Tools are registered in `src/tools/core.ts`, `extended.ts`, and `remaining.ts`. Summary by area:
 
-| Category   | Tools                                                                                         |
-| ---------- | --------------------------------------------------------------------------------------------- |
-| Server     | `discord_list_servers`, `discord_get_server_info`                                             |
-| Messages   | `discord_read_messages`†, `discord_send`, `discord_delete_message`, `discord_search_messages` |
-| Reactions  | `discord_add_reaction`, `discord_add_multiple_reactions`, `discord_remove_reaction`           |
-| Channels   | `discord_create_text_channel`, `discord_delete_channel`                                       |
-| Categories | `discord_create_category`, `discord_delete_category`                                          |
-| Forums     | `discord_get_forum_channels`, `discord_create_forum_post`, `discord_reply_to_forum`           |
-| Threads    | `discord_create_thread`, `discord_send_to_thread`                                             |
-| Webhooks   | `discord_create_webhook`, `discord_send_webhook_message`, `discord_delete_webhook`            |
+| Area                           | Coverage                                                                                                                                  |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Server / guild                 | list/info, edit guild, preview, vanity, widget, welcome screen, onboarding, incident actions, leave                                       |
+| Members / roles                | list/get/search/edit members, roles CRUD + positions + member counts, add/remove role                                                     |
+| Moderation                     | kick, ban/unban, bulk ban, list/get bans, timeout, prune, audit log                                                                       |
+| Messages                       | read/send/edit/delete, search, embeds, polls (+ voters/end), pins, bulk delete, crosspost, typing, attachments, components, stickers      |
+| Reactions                      | add/remove/clear, list users, remove other user’s reaction                                                                                |
+| Channels                       | text/voice/announcement/forum/stage/media/category, get/edit/delete, positions, permission overwrites, voice status, follow announcements |
+| Invites                        | create/list (channel+guild)/get/delete                                                                                                    |
+| Threads / forums               | create (with/without message), forum posts, archive/lock/join, list active/archived, thread members                                       |
+| Webhooks                       | channel/guild list, create/edit/delete, send/edit/get/delete messages, embeds                                                             |
+| Emojis / stickers / soundboard | guild + application emoji CRUD, sticker CRUD, soundboard CRUD + send                                                                      |
+| Events / stage                 | scheduled events CRUD + users, stage instances CRUD                                                                                       |
+| Auto moderation                | rules CRUD                                                                                                                                |
+| Voice                          | regions, get/modify voice states                                                                                                          |
+| Templates                      | list/get/create/sync/edit/delete                                                                                                          |
+| Application / commands         | app get/edit, global + guild slash command CRUD/permissions, SKUs/entitlements, role connection metadata                                  |
+| Users / DMs / interactions     | get user, edit bot user, create DM, interaction response/followup helpers (token required)                                                |
 
-† `discord_read_messages` also supports `before`, `after`, and `around` cursors.
-
-### Additional
-
-| Category   | Tools                                                                                                                                                                                                                                                                                                                                      |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Bot        | `discord_get_me`                                                                                                                                                                                                                                                                                                                           |
-| Messages   | `discord_get_message`, `discord_edit_message`, `discord_send_embed`, `discord_create_poll`, `discord_pin_message`, `discord_unpin_message`, `discord_list_pins`                                                                                                                                                                            |
-| Channels   | `discord_get_channel`, `discord_edit_channel`(name/topic/slowmode/nsfw/category/position), `discord_list_webhooks`, `discord_create_voice_channel`, `discord_create_announcement_channel`, `discord_create_invite`, `discord_set_channel_role_permissions`, `discord_set_channel_member_permissions`, `discord_delete_channel_permissions` |
-| Guild      | `discord_list_roles`, `discord_create_role`, `discord_edit_role`, `discord_delete_role`, `discord_list_emojis`, `discord_get_member`, `discord_list_members`, `discord_add_role`, `discord_remove_role`                                                                                                                                    |
-| Moderation | `discord_kick_member`, `discord_ban_member`, `discord_unban_member`, `discord_timeout_member`, `discord_get_audit_log`                                                                                                                                                                                                                     |
-| Reactions  | `discord_get_reaction_users`, `discord_clear_reactions`                                                                                                                                                                                                                                                                                    |
-| Threads    | `discord_archive_thread`, `discord_unarchive_thread`, `discord_lock_thread`, `discord_join_thread`, `discord_leave_thread`                                                                                                                                                                                                                 |
-| Webhooks   | `discord_send_webhook_embed`                                                                                                                                                                                                                                                                                                               |
-
-Not implemented (REST/multipart or Gateway-heavy): file attachments, message components/buttons, slash command registration, real-time Gateway events.
+Not covered (needs persistent Gateway / user OAuth / deprecated APIs): live Gateway event streams, receiving interactions without your own endpoint, OAuth user connections, creating guilds from templates via deprecated flows.
 
 ## Connect MCP clients
 

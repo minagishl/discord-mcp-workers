@@ -7,6 +7,7 @@ const CHANNEL_TYPES: Record<number, string> = {
 	5: "announcement",
 	13: "stage",
 	15: "forum",
+	16: "media",
 };
 
 export class DiscordApiError extends Error {
@@ -27,6 +28,9 @@ export type MessagePayload = {
 	embeds?: DiscordRecord[];
 	poll?: DiscordRecord;
 	message_reference?: { message_id: string };
+	components?: DiscordRecord[];
+	sticker_ids?: string[];
+	flags?: number;
 };
 
 export type ReadMessagesOptions = {
@@ -71,16 +75,22 @@ export type ChannelPermissionOverwrite = {
 export class DiscordClient {
 	constructor(private readonly botToken: string) {}
 
-	private headers(extra?: HeadersInit): HeadersInit {
+	protected authHeaders(extra?: HeadersInit): HeadersInit {
 		return {
 			Authorization: `Bot ${this.botToken}`,
-			"Content-Type": "application/json",
 			"User-Agent": "discord-mcp-workers (https://github.com/minagishl/discord-mcp-workers)",
 			...extra,
 		};
 	}
 
-	private async request<T>(method: string, path: string, body?: unknown): Promise<T> {
+	protected headers(extra?: HeadersInit): HeadersInit {
+		return {
+			...this.authHeaders(extra),
+			"Content-Type": "application/json",
+		};
+	}
+
+	protected async request<T>(method: string, path: string, body?: unknown): Promise<T> {
 		const response = await fetch(`${DISCORD_API_BASE}${path}`, {
 			method,
 			headers: this.headers(),
@@ -105,6 +115,37 @@ export class DiscordClient {
 
 		if (response.status === 204 || !text) return undefined as T;
 		return JSON.parse(text) as T;
+	}
+
+	protected async requestForm<T>(method: string, path: string, form: FormData): Promise<T> {
+		const response = await fetch(`${DISCORD_API_BASE}${path}`, {
+			method,
+			headers: this.authHeaders(),
+			body: form,
+		});
+
+		const text = await response.text();
+		if (!response.ok) {
+			let detail = text;
+			try {
+				const parsed = JSON.parse(text) as { message?: string };
+				if (parsed.message) detail = parsed.message;
+			} catch {
+				// keep raw body
+			}
+			throw new DiscordApiError(
+				`Discord API ${method} ${path} failed: ${detail}`,
+				response.status,
+				text,
+			);
+		}
+
+		if (response.status === 204 || !text) return undefined as T;
+		return JSON.parse(text) as T;
+	}
+
+	protected encodeEmoji(emoji: string) {
+		return encodeURIComponent(emoji);
 	}
 
 	// --- User / Guild ---
@@ -396,10 +437,6 @@ export class DiscordClient {
 	}
 
 	// --- Reactions ---
-
-	private encodeEmoji(emoji: string) {
-		return encodeURIComponent(emoji);
-	}
 
 	addReaction(channelId: string, messageId: string, emoji: string) {
 		return this.request<void>(
